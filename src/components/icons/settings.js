@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import Icon from "@ant-design/icons";
 
 const Svg = () => (
@@ -31,4 +31,4 @@ const Svg = () => (
   </svg>
 );
 const IconComponent = props => <Icon component={Svg} {...props} />;
-export default IconComponent;
+export default memo(IconComponent);

@@ -45,7 +45,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   listBottomHeight = 48,
   rowHeight = 48,
   // viewMode = ViewMode.Day,
-  //locale = "en-GB",
+  // locale = "en-GB",
   locale = "zh-cn",
   barFill = 60,
   barCornerRadius = 4,
@@ -241,7 +241,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
     } else {
       setSvgContainerHeight(tasks.length * rowHeight + headerHeight);
     }
-  }, [ganttHeight, tasks]);
+  }, [ganttHeight, tasks, headerHeight, rowHeight]);
   useEffect(() => {
     const ele = taskGanttContainerRef?.current?.horizontalContainerRef;
     if (ele) {
@@ -257,11 +257,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
         refScrollY.current);
     verticalScrollContainerRef?.current &&
       (verticalScrollContainerRef.current.scrollTop = refScrollY.current);
-  }, [
-    eleListTableBodyRef.current,
-    taskGanttContainerRef?.current?.horizontalContainerRef,
-    verticalScrollContainerRef?.current,
-  ]);
+  }, []);
 
   const setElementsScrollX = useCallback(() => {
     taskGanttContainerRef?.current?.verticalGanttContainerRef &&
@@ -269,10 +265,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
         refScrollX.current);
     horizontalScrollContainerRef?.current &&
       (horizontalScrollContainerRef.current.scrollLeft = refScrollX.current);
-  }, [
-    taskGanttContainerRef?.current?.verticalGanttContainerRef,
-    horizontalScrollContainerRef?.current,
-  ]);
+  }, []);
 
   const handleWheel = useCallback(
     (event: WheelEvent) => {
@@ -321,8 +314,8 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
       setIgnoreScrollEvent(true);
     },
     [
-      refScrollX.current,
-      refScrollY.current,
+      svgWidth,
+      ganttFullHeight,
       ganttHeight,
       setElementsScrollY,
       setElementsScrollX,
@@ -341,7 +334,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
         wrapperRef.current.removeEventListener("wheel", handleWheel);
       }
     };
-  }, [wrapperRef.current, handleWheel]);
+  }, [handleWheel]);
 
   const handleScrollY = (event: SyntheticEvent<HTMLDivElement>) => {
     const scrollY = refScrollY.current;
@@ -550,13 +543,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
     refScrollX.current = newTickX - svgContainerWidth / 2;
     setElementsScrollX();
     setScrollX(refScrollX.current);
-  }, [
-    JSON.stringify(dateSetup),
-    viewMode,
-    wrapperRef.current,
-    svgContainerWidth,
-    setElementsScrollX,
-  ]);
+  }, [columnWidth, dateSetup.dates, svgContainerWidth, setElementsScrollX]);
 
   useEffect(() => {
     toToday();

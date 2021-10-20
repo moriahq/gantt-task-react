@@ -1,4 +1,4 @@
-import React, { ReactChild } from "react";
+import React, { ReactChild, useCallback, useMemo } from "react";
 import { ViewMode } from "../../types/public-types";
 import { TopPartOfCalendar } from "./top-part-of-calendar";
 import {
@@ -27,7 +27,7 @@ export const Calendar: React.FC<CalendarProps> = ({
   fontFamily,
   fontSize,
 }) => {
-  const getCalendarValuesForYear = () => {
+  const getCalendarValuesForYear = useCallback(() => {
     const topValues: ReactChild[] = [];
     const bottomValues: ReactChild[] = [];
     // const topDefaultWidth = columnWidth * 6;
@@ -47,8 +47,8 @@ export const Calendar: React.FC<CalendarProps> = ({
       );
     }
     return [topValues, bottomValues];
-  };
-  const getCalendarValuesForQuarter = () => {
+  }, [dateSetup, headerHeight, columnWidth]);
+  const getCalendarValuesForQuarter = useCallback(() => {
     const topValues: ReactChild[] = [];
     const bottomValues: ReactChild[] = [];
     const topDefaultWidth = columnWidth * 3;
@@ -92,8 +92,8 @@ export const Calendar: React.FC<CalendarProps> = ({
       }
     }
     return [topValues, bottomValues];
-  };
-  const getCalendarValuesForMonth = () => {
+  }, [columnWidth, headerHeight, dateSetup]);
+  const getCalendarValuesForMonth = useCallback(() => {
     const topValues: ReactChild[] = [];
     const bottomValues: ReactChild[] = [];
     const topDefaultWidth = columnWidth * 6;
@@ -132,9 +132,9 @@ export const Calendar: React.FC<CalendarProps> = ({
       }
     }
     return [topValues, bottomValues];
-  };
+  }, [columnWidth, headerHeight, dateSetup, locale]);
 
-  const getCalendarValuesForWeek = () => {
+  const getCalendarValuesForWeek = useCallback(() => {
     const topValues: ReactChild[] = [];
     const bottomValues: ReactChild[] = [];
     let weeksCount: number = 1;
@@ -181,9 +181,9 @@ export const Calendar: React.FC<CalendarProps> = ({
       weeksCount++;
     }
     return [topValues, bottomValues];
-  };
+  }, [columnWidth, headerHeight, dateSetup]);
 
-  const getCalendarValuesForDay = () => {
+  const getCalendarValuesForDay = useCallback(() => {
     const topValues: ReactChild[] = [];
     const bottomValues: ReactChild[] = [];
     const topDefaultHeight = headerHeight * 0.5;
@@ -222,9 +222,9 @@ export const Calendar: React.FC<CalendarProps> = ({
       }
     }
     return [topValues, bottomValues];
-  };
+  }, [headerHeight, dateSetup, columnWidth]);
 
-  const getCalendarValuesForOther = () => {
+  const getCalendarValuesForOther = useCallback(() => {
     const topValues: ReactChild[] = [];
     const bottomValues: ReactChild[] = [];
     const ticks = viewMode === ViewMode.HalfDay ? 2 : 4;
@@ -263,29 +263,42 @@ export const Calendar: React.FC<CalendarProps> = ({
       }
     }
     return [topValues, bottomValues];
-  };
-  let topValues: ReactChild[] = [];
-  let bottomValues: ReactChild[] = [];
-  switch (dateSetup.viewMode) {
-    case ViewMode.Month:
-      [topValues, bottomValues] = getCalendarValuesForMonth();
-      break;
-    case ViewMode.Week:
-      [topValues, bottomValues] = getCalendarValuesForWeek();
-      break;
-    case ViewMode.Day:
-      [topValues, bottomValues] = getCalendarValuesForDay();
-      break;
-    case ViewMode.Year:
-      [topValues, bottomValues] = getCalendarValuesForYear();
-      break;
-    case ViewMode.Quarter:
-      [topValues, bottomValues] = getCalendarValuesForQuarter();
-      break;
-    default:
-      [topValues, bottomValues] = getCalendarValuesForOther();
-      break;
-  }
+  }, [viewMode, headerHeight, dateSetup, columnWidth, fontFamily, locale]);
+
+  const { topValues, bottomValues } = useMemo(() => {
+    let topValues: ReactChild[] = [];
+    let bottomValues: ReactChild[] = [];
+    switch (dateSetup.viewMode) {
+      case ViewMode.Month:
+        [topValues, bottomValues] = getCalendarValuesForMonth();
+        break;
+      case ViewMode.Week:
+        [topValues, bottomValues] = getCalendarValuesForWeek();
+        break;
+      case ViewMode.Day:
+        [topValues, bottomValues] = getCalendarValuesForDay();
+        break;
+      case ViewMode.Year:
+        [topValues, bottomValues] = getCalendarValuesForYear();
+        break;
+      case ViewMode.Quarter:
+        [topValues, bottomValues] = getCalendarValuesForQuarter();
+        break;
+      default:
+        [topValues, bottomValues] = getCalendarValuesForOther();
+        break;
+    }
+    return { topValues, bottomValues };
+  }, [
+    dateSetup.viewMode,
+    getCalendarValuesForMonth,
+    getCalendarValuesForWeek,
+    getCalendarValuesForDay,
+    getCalendarValuesForYear,
+    getCalendarValuesForQuarter,
+    getCalendarValuesForOther,
+  ]);
+
   return (
     <g className="calendar" fontSize={fontSize} fontFamily={fontFamily}>
       <rect
