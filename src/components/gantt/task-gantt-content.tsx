@@ -90,6 +90,7 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = memo(
     const [isMoving, setIsMoving] = useState(false);
     const [jsPlumbInstance, setJsPlumbInstance] = useState<any>(null);
     const { ganttConfig } = useContext(GanttConfigContext);
+    const [pointInited, setPointInited] = useState(false);
     useEffect(() => {
       const dateDelta =
         dates[1].getTime() -
@@ -203,6 +204,9 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = memo(
       onDateChange,
       svg,
       isMoving,
+      point,
+      setFailedTask,
+      setGanttEvent,
     ]);
 
     /**
@@ -251,8 +255,6 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = memo(
           !!onDoubleClick && onDoubleClick(task);
         } else if (action === "click") {
           const offsetX = event?.nativeEvent?.offsetX;
-          console.log(tasks, "tasks");
-          console.log(offsetX);
           // 当前基线时间块对应的item
           const currentLogItem = tasks.filter(
             (ele: BarTask) => ele.id === task.id
@@ -291,6 +293,8 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = memo(
         setGanttEvent,
         setSelectedTask,
         svg,
+        clickBaselineItem,
+        tasks,
       ]
     );
     const getLinkTypeId = useCallback(
@@ -365,24 +369,27 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = memo(
       [getHasLinkItems]
     );
 
-    const deleteConn = (conn: any) => {
-      const currentLink = itemLinks.filter((ele: any) => {
-        return (
-          ele.source?.objectId === conn?.sourceId &&
-          ele.destination?.objectId === conn?.targetId &&
-          ele.linkType?.objectId === conn.getData()
-        );
-      });
-      if (currentLink.length) {
-        Modal.confirm({
-          title: "解除关联关系",
-          content: "确定要解除卡片的关联关系吗？",
-          okText: "确认",
-          cancelText: "取消",
-          onOk: () => delConnection(currentLink[0].objectId),
+    const deleteConn = useCallback(
+      (conn: any) => {
+        const currentLink = itemLinks.filter((ele: any) => {
+          return (
+            ele.source?.objectId === conn?.sourceId &&
+            ele.destination?.objectId === conn?.targetId &&
+            ele.linkType?.objectId === conn.getData()
+          );
         });
-      }
-    };
+        if (currentLink.length) {
+          Modal.confirm({
+            title: "解除关联关系",
+            content: "确定要解除卡片的关联关系吗？",
+            okText: "确认",
+            cancelText: "取消",
+            onOk: () => delConnection(currentLink[0].objectId),
+          });
+        }
+      },
+      [delConnection, itemLinks]
+    );
     useEffect(() => {
       import("jsplumb").then(({ jsPlumb }: any) => {
         jsPlumb.ready(() => {
@@ -502,13 +509,13 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = memo(
       ganttConfig.relation,
       getLinkTypeId,
     ]);
-
     useEffect(() => {
       if (!itemLinks.length) {
         if (!isEqual(connectUuids, [])) {
           setConnectUuids([]);
         }
       }
+
       if (itemLinks.length && tasks.length && jsPlumbInstance) {
         const newConnectUuids: any = [];
         tasks.forEach((task: any) => {
@@ -547,10 +554,19 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = memo(
           setConnectUuids(newConnectUuids);
         }
       }
-    }, [jsPlumbInstance, itemLinks, tasks, connectUuids, checkIsErrorLink]);
-
+    }, [
+      jsPlumbInstance,
+      itemLinks,
+      tasks,
+      connectUuids,
+      checkIsErrorLink,
+      checkIsPivotalPathLink,
+      ganttConfig.relation,
+      ganttConfig,
+    ]);
     useEffect(() => {
-      if (jsPlumbInstance) {
+      // pointInited是连接点初始化完成的标志，解决jsPlumbInstance.connect连线时，由于连接点未初始化完成导致连线加载不出来
+      if (jsPlumbInstance && connectUuids.length && pointInited) {
         jsPlumbInstance.setSuspendDrawing(true);
         for (let i = 0; i < connectUuids.length; i++) {
           const uuidObj = connectUuids[i];
@@ -603,12 +619,19 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = memo(
         }
         jsPlumbInstance.setSuspendDrawing(false, true);
       }
+
       return () => {
         if (jsPlumbInstance) {
           jsPlumbInstance.deleteEveryConnection();
         }
       };
-    }, [jsPlumbInstance, connectUuids]);
+    }, [
+      jsPlumbInstance,
+      deleteConn,
+      ganttConfig?.relation,
+      connectUuids,
+      pointInited,
+    ]);
     return (
       <g className="content">
         <g className="arrows" fill={arrowColor} stroke={arrowColor}>
@@ -634,7 +657,7 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = memo(
               cuttentLog.y = task.y;
             }
             return (
-              <g key={task.id}>
+              <g key={`g-${task.id}`}>
                 {!cuttentLog?.start || !cuttentLog?.end ? null : (
                   <TaskItemLog
                     task={cuttentLog}
@@ -665,6 +688,7 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = memo(
                     onEventStart={handleBarEventStart}
                     key={task.id}
                     isSelected={!!selectedTask && task.id === selectedTask.id}
+                    setPointInited={setPointInited}
                   />
                 )}
               </g>

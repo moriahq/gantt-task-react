@@ -3,8 +3,8 @@ import React, {
   forwardRef,
   useImperativeHandle,
   SyntheticEvent,
-  memo,
   useContext,
+  memo,
 } from "react";
 import { GridProps, Grid } from "../grid/grid";
 import { CalendarProps, Calendar } from "../calendar/calendar";
