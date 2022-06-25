@@ -7,11 +7,13 @@ import { BaselineProps } from "../../../types/public-types";
 import Checked from "../../icons/checked";
 import { omit } from "lodash";
 import { dayTimeFormat } from "../../../helpers/dicts";
+import useI18n from "../../../lib/hooks/useI18n";
 
 import dayjs from "dayjs";
 
 import styles from "./index.css";
 export const BaseLine: React.FC = () => {
+  const { t } = useI18n();
   const {
     baseLineHandle,
     baselineList,
@@ -22,10 +24,10 @@ export const BaseLine: React.FC = () => {
   } = useContext(BaseLineContext);
   const deleteBaseline = () => {
     Modal.confirm({
-      title: "删除基线",
-      content: "删除的基线无法恢复，确认删除？",
-      okText: "确认",
-      cancelText: "取消",
+      title: t("configuration.baseLineConfiguration.deleteBaseline"),
+      content: `${t("configuration.baseLineConfiguration.deleteDescription")}?`,
+      okText: t("global.complete"),
+      cancelText: t("global.cancle"),
       onOk: () => baseLineHandle(currentBaseline),
     });
   };
@@ -64,7 +66,7 @@ export const BaseLine: React.FC = () => {
   const chooseLog = (infor: BaselineProps) => {
     // 取消选中基线
     if (currentLog?.objectId === infor?.objectId) {
-      setCurrentLog([]);
+      setCurrentLog(null);
       setLogTasks([]);
     } else {
       setCurrentLog(infor);
@@ -79,7 +81,9 @@ export const BaseLine: React.FC = () => {
           onClick={addBaseline}
           disabled={baselineList?.length >= 10}
         >
-          {`创建基线（${baselineList?.length}/10）`}
+          {`${t("configuration.baseLineConfiguration.createBaseline")}（${
+            baselineList?.length
+          }/10）`}
         </Button>
       </div>
       {visible && (
@@ -113,7 +117,7 @@ export const BaseLine: React.FC = () => {
                 <div className={styles.name}>{OverflowTooltip(ele.name)}</div>
                 <div className={styles.time}>
                   <div className={styles.createTime}>
-                    创建于：
+                    {t("global.updatedAt")}：
                     {dayjs(new Date(ele.createdAt)).format(dayTimeFormat)}
                   </div>
                   <div className={styles.handleIcon}>
