@@ -6,6 +6,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
+import debug from "debug";
 import { ViewMode, GanttProps } from "../../types/public-types";
 import { GridProps } from "../grid/grid";
 import {
@@ -50,6 +51,7 @@ const widthData = {
   [ViewMode.Year]: 240,
   [ViewMode.Quarter]: 180,
 };
+const logger = debug("gantt:locale");
 export const Gantt: React.FunctionComponent<GanttProps> = ({
   tasks,
   baseLineLog,
@@ -61,7 +63,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   listBottomHeight = 48,
   rowHeight = 41,
   // viewMode = ViewMode.Day,
-  locale = "zh-cn",
+  locale = "en",
   barFill = 60, // bar占的百分比
   barCornerRadius = 4,
   barProgressColor = "#4B8BFF",
@@ -111,6 +113,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   onClickEvent,
   configVisibleChange, // 甘特图配置页面显示和隐藏
 }) => {
+  logger("locale", locale);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const taskListRef = useRef<HTMLDivElement>(null);
   const onMouseEventRef = useRef<any>(null);
