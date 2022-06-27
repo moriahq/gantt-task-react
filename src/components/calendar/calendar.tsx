@@ -5,8 +5,11 @@ import { getLocaleMonth, getLocalYearMonth } from "../../helpers/date-helper";
 import { DateSetup } from "../../types/date-setup";
 import dayjs from "../../lib/day";
 import useI18n from "../../lib/hooks/useI18n";
+import debug from "debug";
 
 import styles from "./calendar.module.css";
+
+const logger = debug("calender:week");
 
 export type CalendarProps = {
   dateSetup: DateSetup;
@@ -28,6 +31,7 @@ export const Calendar: React.FC<CalendarProps> = memo(
     fontSize,
   }) => {
     const { t } = useI18n();
+    logger(dayjs.locale(), "date-locale");
     const bottomValuesInit = useCallback(
       (bottomValue, date, headerHeight, i, type) => {
         return (
