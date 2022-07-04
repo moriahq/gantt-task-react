@@ -3,16 +3,15 @@ const global = {
   create: "Create",
   cancel: "Cancel",
   back: "Back",
-  complete: "Complete",
+  complete: "OK",
   success: "success",
-  fail: "fail",
+  fail: "Fail",
   updatedAt: "Updated At",
   createdAt: "Created At",
   delete: "Delete",
   default: "Default",
   exit: "Exit",
 };
-
 const date = {
   DateTime: "DateTime",
   Day: "Day",
